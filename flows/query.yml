@@ -1,0 +1,23 @@
+jtype: Flow
+version: '1'
+with:
+  port_expose: $JINA_PORT
+  cors: true
+executors:
+  - name: encoder
+    uses: 'jinahub://TransformerSentenceEncoder'
+    volumes: '~/.cache/huggingface:/root/.cache/huggingface'
+    uses_with:
+      device: 'cuda'
+      traversal_paths: 'r'
+  - name: indexer
+    uses: 'jinahub://SimpleIndexer'
+  - name: ranker
+    uses: 'jinahub://SimpleRanker'
+    uses_with:
+      metric: 'cosine'
+  - name: root_indexer
+    uses: 'jinahub://LMDBStorage'
+    volumes: 'workspace'
+    uses_with:
+      default_traversal_paths: ['m']
