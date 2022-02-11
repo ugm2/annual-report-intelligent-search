@@ -13,7 +13,12 @@ Technologies used:
 ## Installation
 
 * Install poetry in your OS using [this guide](https://python-poetry.org/docs/)
+* Execute:
 
+```shell
+poetry install
+poetry shell
+```
 
 ## Usage
 

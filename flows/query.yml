@@ -10,6 +10,7 @@ executors:
     uses_with:
       device: 'cuda'
       traversal_paths: 'r'
+      model_name: 'all-MiniLM-L6-v2'
   - name: indexer
     uses: 'jinahub://SimpleIndexer'
   - name: ranker
