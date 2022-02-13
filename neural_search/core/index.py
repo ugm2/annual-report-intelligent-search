@@ -1,19 +1,15 @@
-import pandas as pd
 from jina import Flow, Document
-from jina.types.document.generators import from_csv
 import shutil
 import os
+from typing import List
 
 class Index:
 
-    def preprocess_docs(self, docs, index_field):
+    def preprocess_docs(self, docs: List[str]):
         """
         Preprocess documents.
         """
-        docs.dropna(inplace = True)
-        docs.drop_duplicates(subset= [index_field], inplace = True)
-        return docs
-
+        pass
 
     def index_docs(self, path, num_docs, index_field, index_flow_path):
         """
