@@ -23,4 +23,4 @@ class SearchResponse(BaseModel):
 async def index_docs(zipfile: UploadFile = None) -> None:
     file_bytes = io.BytesIO(zipfile.file.read())
     data = data_handler.data_to_list(file_bytes)
-    print(data.shape)
+    
