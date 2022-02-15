@@ -2,10 +2,12 @@ import os
 from typing import List, Tuple
 import zipfile
 import io
-import numpy as np
-from tok import Tokenizer
+from spacy.lang.en import English
 from hashlib import sha512
+import sys
 import csv
+csv.field_size_limit(sys.maxsize)
+from tqdm import tqdm
 
 # Local data path
 DATA_PATH = os.environ.get('DATA_PATH', 'data/')
@@ -13,13 +15,12 @@ DATA_PATH = os.environ.get('DATA_PATH', 'data/')
 class DataHandler:
 
     def __init__(self):
-        self.tokenizer = Tokenizer(
-            currencies=("$", "€", "£", "¥"),
-        )
+        self.nlp = English()
+        self.nlp.add_pipe("sentencizer")
+        self.nlp.max_length = 10000000
         self.persist_path = os.path.join(DATA_PATH, 'persist')
-        os.makedirs(self.persist_path, exist_ok=True)
 
-    def preprocess_docs(self, docs: List[List[str]]) -> List[List[str]]:
+    def preprocess_docs(self, docs: List[str]) -> List[List[str]]:
         """
         Preprocess documents.
 
@@ -30,8 +31,11 @@ class DataHandler:
             list of list of strings
         """
         # Tokenize into sentences
-        docs = [self.tokenizer.sent_tokenize(doc) for doc in docs]
-        return docs
+        docs_sentences = []
+        for doc in tqdm(self.nlp.pipe(docs, batch_size=1000), desc='Preprocessing'):
+            # Add to docs
+            docs_sentences.append([sent.text for sent in doc.sents])
+        return docs_sentences
 
     def hash_docs_name_exists(self, docs: List[str]) -> Tuple[bool, str]:
         """
@@ -43,11 +47,13 @@ class DataHandler:
         Returns:
             Tuple[bool, str]:
         """
+        # Create folder if it doesn't exist
+        os.makedirs(self.persist_path, exist_ok=True)
         # Compute hash of docs
         name = ''.join([doc[0] for doc in docs])
         _hash = sha512(name.encode('utf-8')).hexdigest()
         # Check if _hash exists
-        path = os.path.join(self.persist_path, _hash)
+        path = os.path.join(self.persist_path, _hash + '.csv')
         return os.path.exists(path), path
 
     def persist_preprocessed_docs(self, docs: List[List[str]], path: str) -> None:
@@ -61,7 +67,7 @@ class DataHandler:
             None
         """
         # Save to file
-        with open(path + '.csv', 'w') as f:
+        with open(path, 'w') as f:
             writer = csv.writer(f)
             writer.writerows(docs)
 
@@ -76,7 +82,7 @@ class DataHandler:
             list of list of strings
         """
         # Load data from file
-        with open(path + '.csv', 'r') as f:
+        with open(path, 'r') as f:
             reader = csv.reader(f)
             data = list(reader)
         return data
@@ -103,10 +109,11 @@ class DataHandler:
         else:
             # Load data from folder
             # List of files in folder
-            files = os.listdir(DATA_PATH)
+            data_path = os.path.join(DATA_PATH, 'annual_accounts_txt')
+            files = os.listdir(data_path)
             for file in files:
                 # Read file
-                with open(os.path.join(DATA_PATH, file), 'r') as f:
+                with open(os.path.join(data_path, file), 'r') as f:
                     data = f.read()
                 # Add to docs
                 docs.append(data)

@@ -20,7 +20,12 @@ class SearchResponse(BaseModel):
     docs: List[str]
 
 @app.post('/index')
-async def index_docs(zipfile: UploadFile = None) -> None:
-    file_bytes = io.BytesIO(zipfile.file.read())
+async def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
+    print("Loading bytes")
+    file_bytes = None
+    if zipfile is not None:
+        file_bytes = io.BytesIO(zipfile.file.read())
+    print("Loading zip")
     data = data_handler.data_to_list(file_bytes)
-    
+    print("Indexing")
+    index.index_docs(data, reload)
