@@ -20,7 +20,7 @@ class SearchResponse(BaseModel):
     docs: List[str]
 
 @app.post('/index')
-async def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
+def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
     print("Loading bytes")
     file_bytes = None
     if zipfile is not None:

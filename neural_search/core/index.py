@@ -1,5 +1,5 @@
-from cgitb import text
-from jina import Flow, Document
+from jina import Flow
+from docarray import Document, DocumentArray
 import shutil
 import os
 from typing import List
@@ -30,7 +30,7 @@ class Index:
                 document = Document(text=doc)
                 root_document.chunks.append(document)
             jina_docs.append(root_document)
-        return jina_docs
+        return DocumentArray(jina_docs)
 
     def index_docs(self, docs: List[str], reload: bool = False) -> None:
         """
@@ -50,18 +50,12 @@ class Index:
 
         # Convert to documents
         docs = self.to_document_array(docs)
-        print('Finished')
-        # # Delete workspace before indexing to avoid duplicates
-        # if os.path.isdir('workspace'):
-        #     shutil.rmtree('workspace')
+        # Delete workspace before indexing to avoid duplicates
+        if os.path.isdir('workspace'):
+            shutil.rmtree('workspace')
         
-        # flow = Flow.load_config(index_flow_path)
+        flow = Flow.load_config(INDEX_FLOW_PATH)
         
-        # with flow, open(preprocess_path) as fp:
-        #     flow.logger.info(f'Indexing {preprocess_path}')
-        #     flow.index(from_csv(fp, field_resolver={index_field: 'text'}), show_progress=True)
-
-        # # Remove preprocess_path file
-        # os.remove(preprocess_path)
-
-        return None
+        # Index
+        with flow:
+            flow.index(docs, show_progress=True)

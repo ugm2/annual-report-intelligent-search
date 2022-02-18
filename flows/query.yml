@@ -13,12 +13,9 @@ executors:
       model_name: 'all-MiniLM-L6-v2'
   - name: indexer
     uses: 'jinahub://SimpleIndexer'
+    volumes: 'workspace'
   - name: ranker
     uses: 'jinahub://SimpleRanker'
     uses_with:
       metric: 'cosine'
-  - name: root_indexer
-    uses: 'jinahub://LMDBStorage'
     volumes: 'workspace'
-    uses_with:
-      default_traversal_paths: ['m']

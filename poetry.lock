@@ -374,6 +374,22 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "docarray"
+version = "0.6.3"
+description = "The data structure for unstructured data"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = "*"
+rich = "*"
+
+[package.extras]
+full = ["protobuf (>=3.13.0)", "lz4", "requests", "matplotlib", "pillow", "trimesh", "scipy", "av", "fastapi", "uvicorn", "strawberry-graphql"]
+test = ["pytest", "pytest-timeout", "pytest-mock", "pytest-cov", "pytest-repeat", "pytest-reraise", "mock", "pytest-custom-exit-code", "black", "tensorflow (==2.7.0)", "paddlepaddle (==2.2.0)", "torch (==1.9.0)", "torchvision (==0.10.0)", "datasets", "onnx", "onnxruntime", "jupyterlab", "transformers (==4.16.2)", "weaviate-client (>=3.3.0,<3.4.0)", "pqlite (>=0.2.3)"]
+
+[[package]]
 name = "docker"
 version = "5.0.3"
 description = "A Python library for the Docker Engine API."
@@ -674,7 +690,7 @@ testing = ["Django (<3.1)", "colorama", "docopt", "pytest (<7.0.0)"]
 
 [[package]]
 name = "jina"
-version = "2.4.9"
+version = "3.0.0"
 description = "Jina is the cloud-native neural search framework for any kind of data"
 category = "main"
 optional = false
@@ -685,6 +701,7 @@ aiofiles = "*"
 aiohttp = "*"
 aiostream = "*"
 cryptography = "*"
+docarray = ">=0.6.3"
 docker = "*"
 fastapi = "*"
 filelock = "*"
@@ -693,15 +710,13 @@ kubernetes = ">=18.20.0"
 lz4 = "<3.1.2"
 numpy = "*"
 pathspec = "*"
-protobuf = ">=3.13.0"
+protobuf = ">=3.19.1"
 pydantic = "*"
 python-multipart = "*"
 pyyaml = ">=5.3.1"
-pyzmq = ">=17.1.0"
 requests = "*"
 rich = "*"
-tornado = ">=5.1.0"
-uvicorn = {version = ">=0.14.0", extras = ["standard"]}
+uvicorn = {version = ">=0.14.0,<=0.16.0", extras = ["standard"]}
 uvloop = "*"
 websockets = "*"
 
@@ -710,23 +725,24 @@ Pillow = ["pillow"]
 aiofiles = ["aiofiles"]
 aiohttp = ["aiohttp"]
 aiostream = ["aiostream"]
-all = ["pytest-repeat", "filelock", "requests-mock", "av", "pytest-asyncio", "requests", "docker", "uvloop", "tornado (>=5.1.0)", "pathspec", "aiohttp", "aiofiles", "pytest-reraise", "pydantic", "tensorflow (>=2.0)", "paddlepaddle", "pytest-lazy-fixture", "pyzmq (>=17.1.0)", "lz4 (<3.1.2)", "scipy (>=1.6.1)", "numpy", "portforward (>=0.2.4)", "aiostream", "transformers (<=4.2.2)", "flaky", "kubernetes (>=18.20.0)", "rich", "protobuf (>=3.13.0)", "pytest-kind (==21.1.3)", "websockets", "trimesh", "torchvision (>=0.3.0)", "matplotlib", "cryptography", "fastapi", "datasets", "fluent-logger", "dgl", "pytest-custom-exit-code", "pytest-mock", "grpcio (>=1.33.1)", "pytest", "black (==20.8b1)", "pytest-timeout", "pyyaml (>=5.3.1)", "mock", "pillow", "pytest-cov", "jsonschema", "optuna", "uvicorn[standard] (>=0.14.0)", "python-multipart", "bs4", "torch (>=1.1.0)"]
+all = ["pyyaml (>=5.3.1)", "pytest-lazy-fixture", "numpy", "onnx", "pytest", "optuna", "fastapi", "portforward (>=0.2.4)", "mock", "transformers (<=4.2.2)", "pytest-reraise", "filelock", "trimesh", "aiostream", "websockets", "pytest-cov", "pytest-timeout", "coverage (==6.2)", "lz4 (<3.1.2)", "grpcio (>=1.33.1)", "cryptography", "torchvision (>=0.3.0)", "av", "rich", "pillow", "jsonschema", "paddlepaddle (==2.2.0)", "pytest-custom-exit-code", "aiohttp", "requests", "matplotlib", "pathspec", "torch (>=1.1.0)", "bs4", "uvicorn[standard] (>=0.14.0,<=0.16.0)", "python-multipart", "pydantic", "datasets", "protobuf (>=3.19.1)", "black (==20.8b1)", "pytest-repeat", "tensorflow (>=2.0)", "dgl", "flaky", "uvloop", "pytest-mock", "aiofiles", "docker", "pytest-asyncio", "onnxruntime", "scipy (>=1.6.1)", "kubernetes (>=18.20.0)", "docarray (>=0.6.3)", "pytest-kind (==21.1.3)", "requests-mock"]
 av = ["av"]
 black = ["black (==20.8b1)"]
 bs4 = ["bs4"]
-cicd = ["trimesh", "tensorflow (>=2.0)", "datasets", "av", "paddlepaddle", "jsonschema", "dgl", "bs4", "portforward (>=0.2.4)"]
-core = ["protobuf (>=3.13.0)", "pyzmq (>=17.1.0)", "grpcio (>=1.33.1)", "numpy", "tornado (>=5.1.0)", "pyyaml (>=5.3.1)"]
+cicd = ["onnx", "onnxruntime", "portforward (>=0.2.4)", "tensorflow (>=2.0)", "av", "dgl", "jsonschema", "trimesh", "paddlepaddle (==2.2.0)", "bs4", "datasets"]
+core = ["pyyaml (>=5.3.1)", "numpy", "grpcio (>=1.33.1)", "docarray (>=0.6.3)", "protobuf (>=3.19.1)"]
+coverage = ["coverage (==6.2)"]
 cryptography = ["cryptography"]
-daemon = ["aiofiles", "rich", "lz4 (<3.1.2)", "filelock", "websockets", "pydantic", "cryptography", "fastapi", "fluent-logger", "aiohttp", "python-multipart", "uvicorn[standard] (>=0.14.0)", "requests", "docker", "uvloop", "pathspec", "aiostream"]
+daemon = ["lz4 (<3.1.2)", "cryptography", "fastapi", "rich", "aiofiles", "filelock", "uvloop", "aiostream", "websockets", "requests", "aiohttp", "pathspec", "uvicorn[standard] (>=0.14.0,<=0.16.0)", "python-multipart", "docker", "pydantic"]
 datasets = ["datasets"]
-demo = ["pillow", "pydantic", "fastapi", "uvicorn[standard] (>=0.14.0)", "torchvision (>=0.3.0)", "torch (>=1.1.0)", "transformers (<=4.2.2)"]
-devel = ["filelock", "requests", "docker", "uvloop", "aiohttp", "pathspec", "aiofiles", "pydantic", "lz4 (<3.1.2)", "scipy (>=1.6.1)", "aiostream", "kubernetes (>=18.20.0)", "rich", "websockets", "matplotlib", "cryptography", "fastapi", "fluent-logger", "optuna", "uvicorn[standard] (>=0.14.0)", "python-multipart"]
+demo = ["torchvision (>=0.3.0)", "fastapi", "pillow", "transformers (<=4.2.2)", "torch (>=1.1.0)", "uvicorn[standard] (>=0.14.0,<=0.16.0)", "pydantic"]
+devel = ["optuna", "fastapi", "filelock", "aiostream", "websockets", "lz4 (<3.1.2)", "cryptography", "rich", "aiohttp", "requests", "matplotlib", "pathspec", "uvicorn[standard] (>=0.14.0,<=0.16.0)", "python-multipart", "pydantic", "uvloop", "aiofiles", "docker", "scipy (>=1.6.1)", "kubernetes (>=18.20.0)"]
 dgl = ["dgl"]
+docarray = ["docarray (>=0.6.3)"]
 docker = ["docker"]
 fastapi = ["fastapi"]
 filelock = ["filelock"]
 flaky = ["flaky"]
-fluent-logger = ["fluent-logger"]
 grpcio = ["grpcio (>=1.33.1)"]
 jsonschema = ["jsonschema"]
 kubernetes = ["kubernetes (>=18.20.0)"]
@@ -734,12 +750,14 @@ lz4 = ["lz4 (<3.1.2)"]
 matplotlib = ["matplotlib"]
 mock = ["mock"]
 numpy = ["numpy"]
+onnx = ["onnx"]
+onnxruntime = ["onnxruntime"]
 optuna = ["optuna"]
-paddlepaddle = ["paddlepaddle"]
+paddlepaddle = ["paddlepaddle (==2.2.0)"]
 pathspec = ["pathspec"]
 perf = ["lz4 (<3.1.2)", "kubernetes (>=18.20.0)", "uvloop"]
 portforward = ["portforward (>=0.2.4)"]
-protobuf = ["protobuf (>=3.13.0)"]
+protobuf = ["protobuf (>=3.19.1)"]
 pydantic = ["pydantic"]
 pytest = ["pytest"]
 pytest-asyncio = ["pytest-asyncio"]
@@ -753,20 +771,18 @@ pytest-reraise = ["pytest-reraise"]
 pytest-timeout = ["pytest-timeout"]
 python-multipart = ["python-multipart"]
 pyyaml = ["pyyaml (>=5.3.1)"]
-pyzmq = ["pyzmq (>=17.1.0)"]
 requests = ["requests"]
 requests-mock = ["requests-mock"]
 rich = ["rich"]
 scipy = ["scipy (>=1.6.1)"]
-standard = ["aiofiles", "kubernetes (>=18.20.0)", "rich", "lz4 (<3.1.2)", "filelock", "websockets", "pydantic", "cryptography", "fastapi", "aiohttp", "python-multipart", "uvicorn[standard] (>=0.14.0)", "requests", "docker", "uvloop", "pathspec", "aiostream"]
+standard = ["lz4 (<3.1.2)", "cryptography", "fastapi", "rich", "aiofiles", "filelock", "uvloop", "aiostream", "websockets", "requests", "aiohttp", "pathspec", "kubernetes (>=18.20.0)", "uvicorn[standard] (>=0.14.0,<=0.16.0)", "python-multipart", "docker", "pydantic"]
 tensorflow = ["tensorflow (>=2.0)"]
-test = ["flaky", "mock", "pytest-repeat", "pytest-kind (==21.1.3)", "pytest-cov", "requests-mock", "pytest-custom-exit-code", "pytest-mock", "pytest-lazy-fixture", "pytest-asyncio", "pytest", "pytest-reraise", "black (==20.8b1)", "pytest-timeout"]
+test = ["pytest-lazy-fixture", "mock", "black (==20.8b1)", "requests-mock", "pytest-reraise", "flaky", "pytest-custom-exit-code", "pytest-mock", "pytest-cov", "pytest-timeout", "coverage (==6.2)", "pytest-kind (==21.1.3)", "pytest", "pytest-asyncio", "pytest-repeat"]
 torch = ["torch (>=1.1.0)"]
 torchvision = ["torchvision (>=0.3.0)"]
-tornado = ["tornado (>=5.1.0)"]
 transformers = ["transformers (<=4.2.2)"]
 trimesh = ["trimesh"]
-"uvicorn[standard" = ["uvicorn[standard] (>=0.14.0)"]
+"uvicorn[standard" = ["uvicorn[standard] (>=0.14.0,<=0.16.0)"]
 uvloop = ["uvloop"]
 websockets = ["websockets"]
 
@@ -1587,7 +1603,7 @@ win32 = ["pywin32"]
 
 [[package]]
 name = "sentence-transformers"
-version = "2.1.0"
+version = "2.0.0"
 description = "Sentence Embeddings using BERT / RoBERTa / XLM-R"
 category = "main"
 optional = false
@@ -1600,7 +1616,6 @@ numpy = "*"
 scikit-learn = "*"
 scipy = "*"
 sentencepiece = "*"
-tokenizers = ">=0.10.3"
 torch = ">=1.6.0"
 torchvision = "*"
 tqdm = "*"
@@ -2073,11 +2088,11 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "uvicorn"
-version = "0.17.4"
+version = "0.16.0"
 description = "The lightning-fast ASGI server."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = "*"
 
 [package.dependencies]
 asgiref = ">=3.4.0"
@@ -2090,10 +2105,10 @@ PyYAML = {version = ">=5.1", optional = true, markers = "extra == \"standard\""}
 typing-extensions = {version = "*", markers = "python_version < \"3.8\""}
 uvloop = {version = ">=0.14.0,<0.15.0 || >0.15.0,<0.15.1 || >0.15.1", optional = true, markers = "sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\" and extra == \"standard\""}
 watchgod = {version = ">=0.6", optional = true, markers = "extra == \"standard\""}
-websockets = {version = ">=10.0", optional = true, markers = "extra == \"standard\""}
+websockets = {version = ">=10.0", optional = true, markers = "python_version >= \"3.7\" and extra == \"standard\""}
 
 [package.extras]
-standard = ["websockets (>=10.0)", "httptools (>=0.2.0,<0.4.0)", "watchgod (>=0.6)", "python-dotenv (>=0.13)", "PyYAML (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "colorama (>=0.4)"]
+standard = ["httptools (>=0.2.0,<0.4.0)", "watchgod (>=0.6)", "python-dotenv (>=0.13)", "PyYAML (>=5.1)", "websockets (>=9.1)", "websockets (>=10.0)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "colorama (>=0.4)"]
 
 [[package]]
 name = "uvloop"
@@ -2225,7 +2240,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<4.0"
-content-hash = "e07cebb676179d3935ed08f035c912a0499216499f74a4a14f73ec91e7a19946"
+content-hash = "15f278b6b11ca1338e123ceb02299d4c47edad687d6dcec23ce71824a12514a2"
 
 [metadata.files]
 aiofiles = [
@@ -2575,6 +2590,9 @@ defusedxml = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
 ]
+docarray = [
+    {file = "docarray-0.6.3.tar.gz", hash = "sha256:9bec2a46741b960190787e9d054b69371c936267cbb5ef3f96470042f84e6f3a"},
+]
 docker = [
     {file = "docker-5.0.3-py2.py3-none-any.whl", hash = "sha256:7a79bb439e3df59d0a72621775d600bc8bc8b422d285824cb37103eab91d1ce0"},
     {file = "docker-5.0.3.tar.gz", hash = "sha256:d916a26b62970e7c2f554110ed6af04c7ccff8e9f81ad17d0d40c75637e227fb"},
@@ -2781,7 +2799,7 @@ jedi = [
     {file = "jedi-0.18.1.tar.gz", hash = "sha256:74137626a64a99c8eb6ae5832d99b3bdd7d29a3850fe2aa80a4126b2a7d949ab"},
 ]
 jina = [
-    {file = "jina-2.4.9.tar.gz", hash = "sha256:9c4ea212d4ebdc6683c87e2de027d6f5d9b8b156b33f873da1542e4ff80841a2"},
+    {file = "jina-3.0.0.tar.gz", hash = "sha256:d8c033d34f31a7086385242087fd8d1d567699eddad67f401ef8b216c9636cff"},
 ]
 jinja2 = [
     {file = "Jinja2-3.0.3-py3-none-any.whl", hash = "sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8"},
@@ -3614,7 +3632,7 @@ send2trash = [
     {file = "Send2Trash-1.8.0.tar.gz", hash = "sha256:d2c24762fd3759860a0aff155e45871447ea58d2be6bdd39b5c8f966a0c99c2d"},
 ]
 sentence-transformers = [
-    {file = "sentence-transformers-2.1.0.tar.gz", hash = "sha256:ccf95fa214546ac64428e86286e9d674b62900893936b46b26c904eb9dfcad19"},
+    {file = "sentence-transformers-2.0.0.tar.gz", hash = "sha256:492eae8e9973f2b758d66d74325661e2816f0b6637365554a1eca9bcf60088ed"},
 ]
 sentencepiece = [
     {file = "sentencepiece-0.1.96-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cc969e6694fb27fba7cee2953f350804faf03913f25ae1ee713a7b8a1bc08018"},
@@ -3900,8 +3918,8 @@ urllib3 = [
     {file = "urllib3-1.26.7.tar.gz", hash = "sha256:4987c65554f7a2dbf30c18fd48778ef124af6fab771a377103da0585e2336ece"},
 ]
 uvicorn = [
-    {file = "uvicorn-0.17.4-py3-none-any.whl", hash = "sha256:e85872d84fb651cccc4c5d2a71cf7ead055b8fb4d8f1e78e36092282c0cf2aec"},
-    {file = "uvicorn-0.17.4.tar.gz", hash = "sha256:25850bbc86195a71a6477b3e4b3b7b4c861fb687fb96912972ce5324472b1011"},
+    {file = "uvicorn-0.16.0-py3-none-any.whl", hash = "sha256:d8c839231f270adaa6d338d525e2652a0b4a5f4c2430b5c4ef6ae4d11776b0d2"},
+    {file = "uvicorn-0.16.0.tar.gz", hash = "sha256:eacb66afa65e0648fcbce5e746b135d09722231ffffc61883d4fac2b62fbea8d"},
 ]
 uvloop = [
     {file = "uvloop-0.16.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6224f1401025b748ffecb7a6e2652b17768f30b1a6a3f7b44660e5b5b690b12d"},
