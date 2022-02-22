@@ -1,4 +1,5 @@
 jtype: Flow
+version: '1'
 
 executors:
   - name: encoder

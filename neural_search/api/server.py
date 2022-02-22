@@ -2,14 +2,12 @@ import io
 from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from neural_search.core.index import Index
-from neural_search.core.query import Query
+from neural_search.core.search import Search
 from neural_search.core.utils import DataHandler
 
 app = FastAPI()
 
-index = Index()
-query = Query()
+search = Search()
 data_handler = DataHandler()
 
 class IndexPayload(BaseModel):
@@ -28,4 +26,10 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
     print("Loading zip")
     data = data_handler.data_to_list(file_bytes)
     print("Indexing")
-    index.index_docs(data, reload)
+    search.index(data, reload)
+
+@app.post('/search')
+def search_docs(query: str) -> SearchResponse:
+    search_results = search.query(query)
+    print(search_results)
+    return SearchResponse(docs=search_results)

@@ -1,5 +1,5 @@
 import click
-from neural_search.core.index import index_docs
+from neural_search.core.search import index_docs
 from jina import Flow
 
 def query(query_flow_path):

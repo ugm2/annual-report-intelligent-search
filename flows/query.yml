@@ -1,8 +1,6 @@
 jtype: Flow
 version: '1'
-with:
-  port_expose: $JINA_PORT
-  cors: true
+
 executors:
   - name: encoder
     uses: 'jinahub://TransformerSentenceEncoder'
@@ -10,7 +8,7 @@ executors:
     uses_with:
       device: 'cuda'
       traversal_paths: 'r'
-      model_name: 'all-MiniLM-L6-v2'
+      model_name: 'sentence-transformers/all-MiniLM-L6-v2'
   - name: indexer
     uses: 'jinahub://SimpleIndexer'
     volumes: 'workspace'

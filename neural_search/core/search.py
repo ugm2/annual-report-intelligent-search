@@ -1,4 +1,5 @@
 from jina import Flow
+from jina import AsyncFlow
 from docarray import Document, DocumentArray
 import shutil
 import os
@@ -7,8 +8,9 @@ from neural_search.core.utils import DataHandler
 from tqdm import tqdm
 
 INDEX_FLOW_PATH = os.environ.get('INDEX_FLOW_PATH', 'flows/index.yml')
+QUERY_FLOW_PATH = os.environ.get('QUERY_FLOW_PATH', 'flows/query.yml')
 
-class Index:
+class Search:
 
     def __init__(self):
         self.data_handler = DataHandler()
@@ -32,7 +34,7 @@ class Index:
             jina_docs.append(root_document)
         return DocumentArray(jina_docs)
 
-    def index_docs(self, docs: List[str], reload: bool = False) -> None:
+    def index(self, docs: List[str], reload: bool = False) -> None:
         """
         Index documents.
         """
@@ -59,3 +61,19 @@ class Index:
         # Index
         with flow:
             flow.index(docs, show_progress=True)
+
+    def query(self, query: str, top_k : int = 5) -> List[str]:
+        """
+        Query documents.
+        """
+        flow = Flow.load_config(QUERY_FLOW_PATH)
+        with flow:
+            query = Document(text=query)
+            response = flow.search(inputs=query, return_results=True)
+
+        # Get top k matches
+        top_k_matches = []
+        for match in response[:top_k]:
+            top_k_matches.append(match.text)
+
+        return top_k_matches
