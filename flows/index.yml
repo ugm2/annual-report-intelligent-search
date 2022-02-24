@@ -7,7 +7,7 @@ executors:
     volumes: '~/.cache/huggingface:/root/.cache/huggingface'
     uses_with:
       device: 'cuda'
-      traversal_paths: 'c'
+      traversal_paths: '@c'
       model_name: 'sentence-transformers/all-MiniLM-L6-v2'
   - name: indexer
     uses: 'jinahub://SimpleIndexer'
