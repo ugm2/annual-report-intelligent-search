@@ -7,13 +7,17 @@ executors:
     volumes: '~/.cache/huggingface:/root/.cache/huggingface'
     uses_with:
       device: 'cuda'
-      traversal_paths: '@r'
       model_name: 'sentence-transformers/all-MiniLM-L6-v2'
   - name: indexer
-    uses: 'jinahub://SimpleIndexer'
+    uses: 'jinahub://SimpleIndexer/v0.14'
+    install_requirements: True
+    uses_with:
+      traversal_right: '@c'
+      traversal_left: '@r'
     volumes: 'workspace'
   - name: ranker
     uses: 'jinahub://SimpleRanker'
+    install_requirements: True
     uses_with:
       metric: 'cosine'
     volumes: 'workspace'

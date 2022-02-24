@@ -70,10 +70,17 @@ class Search:
         with flow:
             query = Document(text=query)
             response = flow.search(inputs=query, return_results=True)
-
+        print(response)
         # Get top k matches
+        print("HI")
+        for query in response:
+            print(query.matches)
+            for match in query.matches[:top_k]:
+                print(match.text)
+        print("BYE")
         top_k_matches = []
         for match in response[:top_k]:
+            print(match)
             top_k_matches.append(match.text)
 
         return top_k_matches
