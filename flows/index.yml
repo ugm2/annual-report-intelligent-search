@@ -8,6 +8,7 @@ executors:
     uses_with:
       device: 'cuda'
       model_name: 'sentence-transformers/all-MiniLM-L6-v2'
+      traversal_paths: '@c'
   - name: indexer
     uses: 'jinahub://SimpleIndexer'
     install_requirements: True

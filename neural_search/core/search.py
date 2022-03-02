@@ -1,9 +1,8 @@
 from jina import Flow
-from jina import AsyncFlow
 from docarray import Document, DocumentArray
 import shutil
 import os
-from typing import List
+from typing import List, Dict
 from neural_search.core.utils import DataHandler
 from tqdm import tqdm
 
@@ -26,8 +25,9 @@ class Search:
             list of documents
         """
         jina_docs = []
-        for docs in tqdm(list_docs, desc='Converting to documents'):
+        for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
             root_document = Document()
+            root_document.text = 'Document {}'.format(i)
             for doc in docs:
                 document = Document(text=doc)
                 root_document.chunks.append(document)
@@ -62,7 +62,7 @@ class Search:
         with flow:
             flow.index(docs, show_progress=True)
 
-    def query(self, query: str, top_k : int = 5) -> List[str]:
+    def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
         """
         Query documents.
         """
@@ -70,17 +70,13 @@ class Search:
         with flow:
             query = Document(text=query)
             response = flow.search(inputs=query, return_results=True)
-        print(response)
         # Get top k matches
-        print("HI")
-        for query in response:
-            print(query.matches)
-            for match in query.matches[:top_k]:
-                print(match.text)
-        print("BYE")
         top_k_matches = []
-        for match in response[:top_k]:
-            print(match)
-            top_k_matches.append(match.text)
-
+        for r in response:
+            for match in r.matches[:top_k]:
+                score = list(match.scores.values())[0].value
+                top_k_matches.append({
+                    'text': match.text,
+                    'score': round(1.0 - score, 2)
+                })
         return top_k_matches

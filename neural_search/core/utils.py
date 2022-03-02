@@ -20,6 +20,22 @@ class DataHandler:
         self.nlp.max_length = 10000000
         self.persist_path = os.path.join(DATA_PATH, 'persist')
 
+    def _clean_text(self, text):
+        """
+        Clean text.
+
+        Args:
+            text: text
+
+        Returns:
+            text
+        """
+        # Remove new lines
+        text = text.replace('\n', ' ')
+        # Remove multiple spaces
+        text = ' '.join(text.split())
+        return text
+
     def preprocess_docs(self, docs: List[str]) -> List[List[str]]:
         """
         Preprocess documents.
@@ -33,8 +49,12 @@ class DataHandler:
         # Tokenize into sentences
         docs_sentences = []
         for doc in tqdm(self.nlp.pipe(docs, batch_size=1000), desc='Preprocessing'):
+            # Get sentences
+            sentences = [sent.text for sent in doc.sents]
+            # Clean sentences
+            sentences = list(map(self._clean_text, sentences))
             # Add to docs
-            docs_sentences.append([sent.text for sent in doc.sents])
+            docs_sentences.append(sentences)
         return docs_sentences
 
     def hash_docs_name_exists(self, docs: List[str]) -> Tuple[bool, str]:

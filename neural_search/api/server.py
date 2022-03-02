@@ -1,7 +1,7 @@
 import io
 from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Dict, List, Optional
 from neural_search.core.search import Search
 from neural_search.core.utils import DataHandler
 
@@ -14,8 +14,14 @@ class IndexPayload(BaseModel):
     files: UploadFile = Field(..., title='Optional zip file')
     num_docs: Optional[int]
 
+class SearchResponseDict(BaseModel):
+    text: str
+    score: float
+
 class SearchResponse(BaseModel):
-    docs: List[str]
+    docs: List[SearchResponseDict]
+    query: str
+    top_k: int
 
 @app.post('/index')
 def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
@@ -31,5 +37,7 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
 @app.post('/search')
 def search_docs(query: str) -> SearchResponse:
     search_results = search.query(query)
-    print(search_results)
-    return SearchResponse(docs=search_results)
+    return SearchResponse(
+        docs=search_results,
+        query=query,
+        top_k=5)
