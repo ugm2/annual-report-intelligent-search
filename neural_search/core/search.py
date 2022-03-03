@@ -77,6 +77,7 @@ class Search:
                 score = list(match.scores.values())[0].value
                 top_k_matches.append({
                     'text': match.text,
-                    'score': round(1.0 - score, 2)
+                    'score': round(1.0 - score, 2),
+                    'parent': match.parent_text
                 })
         return top_k_matches

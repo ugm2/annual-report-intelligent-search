@@ -8,13 +8,14 @@ executors:
     uses_with:
       device: 'cuda'
       model_name: 'sentence-transformers/all-MiniLM-L6-v2'
-  - name: indexer
-    uses: 'jinahub://SimpleIndexer'
+  - name: customIndexer
+    uses: 'CustomIndexer'
+    py_modules: 'neural_search/core/executors.py'
     install_requirements: True
     uses_with:
       traversal_right: '@c'
       traversal_left: '@r'
-    volumes: 'workspace'
+    workspace: workspace
   - name: ranker
     uses: 'jinahub://SimpleRanker'
     install_requirements: True

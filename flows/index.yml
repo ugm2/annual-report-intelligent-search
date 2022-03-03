@@ -9,7 +9,8 @@ executors:
       device: 'cuda'
       model_name: 'sentence-transformers/all-MiniLM-L6-v2'
       traversal_paths: '@c'
-  - name: indexer
-    uses: 'jinahub://SimpleIndexer'
+  - name: customIndexer
+    uses: 'CustomIndexer'
+    py_modules: 'neural_search/core/executors.py'
     install_requirements: True
-    volumes: 'workspace'
+    workspace: workspace
