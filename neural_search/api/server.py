@@ -14,9 +14,13 @@ class IndexPayload(BaseModel):
     files: UploadFile = Field(..., title='Optional zip file')
     num_docs: Optional[int]
 
+class SearchResponseTags(BaseModel):
+    parent_text: str
+
 class SearchResponseDict(BaseModel):
     text: str
     score: float
+    tags: SearchResponseTags
 
 class SearchResponse(BaseModel):
     docs: List[SearchResponseDict]

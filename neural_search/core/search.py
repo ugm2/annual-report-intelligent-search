@@ -30,6 +30,7 @@ class Search:
             root_document.text = 'Document {}'.format(i)
             for doc in docs:
                 document = Document(text=doc)
+                document.tags = {'parent_text': root_document.text}
                 root_document.chunks.append(document)
             jina_docs.append(root_document)
         return DocumentArray(jina_docs)
@@ -78,6 +79,6 @@ class Search:
                 top_k_matches.append({
                     'text': match.text,
                     'score': round(1.0 - score, 2),
-                    'parent': match.parent_text
+                    'tags': {'parent_text': match.tags['parent_text']}
                 })
         return top_k_matches

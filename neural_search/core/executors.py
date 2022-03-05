@@ -90,22 +90,6 @@ class CustomIndexer(Executor):
         traversal_left = parameters.get('traversal_left', self.default_traversal_left)
         match_args = CustomIndexer._filter_match_params(docs, match_args)
         docs[traversal_left].match(self._index[traversal_right], **match_args)
-        modified_docs = docs
-        for d in docs:
-            modified_matches = []
-            for m in d.matches:
-                parent_text = ""
-                for p in self._index:
-                    if p.id == m.parent_id:
-                        parent_text = p.text
-                        break
-                m.parent_text = parent_text
-                modified_matches.append(m)
-            modified_docs.matches = DocumentArray(modified_matches)
-        docs = modified_docs
-
-        for d in docs:
-            print([m for m in d.matches][0])
 
     @staticmethod
     def _filter_match_params(docs, match_args):
