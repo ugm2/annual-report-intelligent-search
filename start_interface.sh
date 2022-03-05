@@ -1,0 +1,1 @@
+streamlit run interface/streamlit.py --server.port 5002

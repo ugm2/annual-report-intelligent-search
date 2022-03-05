@@ -10,9 +10,9 @@ app = FastAPI()
 search = Search()
 data_handler = DataHandler()
 
-class IndexPayload(BaseModel):
-    files: UploadFile = Field(..., title='Optional zip file')
-    num_docs: Optional[int]
+class SearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
 
 class SearchResponseTags(BaseModel):
     parent_text: str
@@ -39,9 +39,9 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
     search.index(data, reload)
 
 @app.post('/search')
-def search_docs(query: str) -> SearchResponse:
-    search_results = search.query(query)
+def search_docs(search_request: SearchRequest) -> SearchResponse:
+    search_results = search.query(search_request.query)
     return SearchResponse(
         docs=search_results,
-        query=query,
+        query=search_request.query,
         top_k=5)
