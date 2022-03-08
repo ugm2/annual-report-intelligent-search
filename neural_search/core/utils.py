@@ -48,7 +48,8 @@ class DataHandler:
         """
         # Tokenize into sentences
         docs_sentences = []
-        for doc in tqdm(self.nlp.pipe(docs, batch_size=1000), desc='Preprocessing'):
+        total_len = len(docs)/1000 if len(docs) > 1000 else len(docs)
+        for doc in tqdm(self.nlp.pipe(docs, batch_size=1000), desc='Preprocessing', total=total_len):
             # Get sentences
             sentences = [sent.text for sent in doc.sents]
             # Clean sentences
