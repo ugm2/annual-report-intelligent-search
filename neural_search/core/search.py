@@ -6,13 +6,15 @@ from typing import List, Dict
 from neural_search.core.utils import DataHandler
 from tqdm import tqdm
 
-INDEX_FLOW_PATH = os.environ.get('INDEX_FLOW_PATH', 'flows/index.yml')
-QUERY_FLOW_PATH = os.environ.get('QUERY_FLOW_PATH', 'flows/query.yml')
+# INDEX_FLOW_PATH = os.environ.get('INDEX_FLOW_PATH', 'flows/index.yml')
+# QUERY_FLOW_PATH = os.environ.get('QUERY_FLOW_PATH', 'flows/query.yml')
+FLOW_PATH = os.environ.get('FLOW_PATH', 'flows/index_query.yml')
 
 class Search:
 
     def __init__(self):
         self.data_handler = DataHandler()
+        self.flow = Flow.load_config(FLOW_PATH)
 
     def to_document_array(self, list_docs: List[List[str]]) -> List[Document]:
         """
@@ -57,20 +59,15 @@ class Search:
         if os.path.isdir('workspace'):
             shutil.rmtree('workspace')
         
-        flow = Flow.load_config(INDEX_FLOW_PATH)
-        
-        # Index
-        with flow:
-            flow.index(docs, show_progress=True)
+        self.flow.index(docs, parameters={'traversal_paths': '@c'}, show_progress=True)
 
     def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
         """
         Query documents.
         """
-        flow = Flow.load_config(QUERY_FLOW_PATH)
-        with flow:
-            query = Document(text=query)
-            response = flow.search(inputs=query, return_results=True)
+
+        query = Document(text=query)
+        response = self.flow.search(inputs=query, return_results=True)
         # Get top k matches
         top_k_matches = []
         for r in response:

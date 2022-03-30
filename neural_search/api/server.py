@@ -1,7 +1,7 @@
 import io
 from fastapi import FastAPI, UploadFile
-from pydantic import BaseModel, Field
-from typing import Dict, List, Optional
+from pydantic import BaseModel
+from typing import List
 from neural_search.core.search import Search
 from neural_search.core.utils import DataHandler
 
