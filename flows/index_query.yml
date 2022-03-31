@@ -16,9 +16,8 @@ executors:
       traversal_right: '@c'
       traversal_left: '@r'
     workspace: workspace
-  - name: customRanker
-    uses: 'CustomRanker'
-    py_modules: 'neural_search/core/executors.py'
+  - name: ranker
+    uses: 'jinahub://SimpleRanker'
     install_requirements: True
     uses_with:
       metric: 'cosine'

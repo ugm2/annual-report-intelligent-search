@@ -45,3 +45,7 @@ def search_docs(search_request: SearchRequest) -> SearchResponse:
         docs=search_results,
         query=search_request.query,
         top_k=5)
+
+@app.on_event("shutdown")
+def shutdown_event():
+    search.close()

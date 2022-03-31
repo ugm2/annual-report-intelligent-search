@@ -143,9 +143,9 @@ class CustomIndexer(Executor):
         self._index.clear()
 
 
-class SimpleRanker(Executor):
+class CustomRanker(Executor):
     """
-    :class:`SimpleRanker` aggregates the score of the matched doc from the
+    :class:`CustomRanker` aggregates the score of the matched doc from the
         matched chunks. For each matched doc, the score is aggregated from all the
         matched chunks belonging to that doc. The score of the document is the minimum
         score (min distance) among the chunks. The aggregated matches are sorted by

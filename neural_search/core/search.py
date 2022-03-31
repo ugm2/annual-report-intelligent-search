@@ -15,6 +15,10 @@ class Search:
     def __init__(self):
         self.data_handler = DataHandler()
         self.flow = Flow.load_config(FLOW_PATH)
+        self.flow.start()
+
+    def close(self):
+        self.flow.close()
 
     def to_document_array(self, list_docs: List[List[str]]) -> List[Document]:
         """
@@ -56,9 +60,8 @@ class Search:
         # Convert to documents
         docs = self.to_document_array(docs)
         # Delete workspace before indexing to avoid duplicates
-        if os.path.isdir('workspace'):
-            shutil.rmtree('workspace')
-        
+        # if os.path.isdir('workspace'):
+        #     shutil.rmtree('workspace')
         self.flow.index(docs, parameters={'traversal_paths': '@c'}, show_progress=True)
 
     def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
