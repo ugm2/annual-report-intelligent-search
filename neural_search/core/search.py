@@ -6,8 +6,6 @@ from typing import List, Dict
 from neural_search.core.utils import DataHandler
 from tqdm import tqdm
 
-# INDEX_FLOW_PATH = os.environ.get('INDEX_FLOW_PATH', 'flows/index.yml')
-# QUERY_FLOW_PATH = os.environ.get('QUERY_FLOW_PATH', 'flows/query.yml')
 FLOW_PATH = os.environ.get('FLOW_PATH', 'flows/index_query.yml')
 
 class Search:
@@ -70,11 +68,15 @@ class Search:
         """
 
         query = Document(text=query)
-        response = self.flow.search(inputs=query, return_results=True)
+        response = self.flow.search(
+            inputs=query,
+            return_results=True,
+            parameters={'limit': top_k}
+        )
         # Get top k matches
         top_k_matches = []
         for r in response:
-            for match in r.matches[:top_k]:
+            for match in r.matches:
                 score = list(match.scores.values())[0].value
                 top_k_matches.append({
                     'text': match.text,
