@@ -48,4 +48,4 @@ def search_docs(search_request: SearchRequest) -> SearchResponse:
 
 @app.on_event("shutdown")
 def shutdown_event():
-    search.close()
+    search.close_flow()

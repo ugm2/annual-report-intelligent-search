@@ -1,4 +1,4 @@
-from jina import Flow
+from jina import Flow, Client
 from docarray import Document, DocumentArray
 import shutil
 import os
@@ -12,11 +12,36 @@ class Search:
 
     def __init__(self):
         self.data_handler = DataHandler()
-        self.flow = Flow.load_config(FLOW_PATH)
-        self.flow.start()
+        self._init_flow()
 
-    def close(self):
+    def _init_flow(self):
+        """
+        Initialize flow.
+        """
+        self.flow = Flow.load_config(FLOW_PATH)
+        self.flow.expose_endpoint('/clear')
+        self.flow.expose_endpoint('/length')
+        self.flow.start()
+        self.client = Client(port=self.flow.port)
+
+    def close_flow(self):
+        """Close the flow."""
         self.flow.close()
+
+    def _clear_index(self):
+        """
+        Clear the index calling the endpoint /clear
+        """
+        self.client.post('/clear')
+
+    def _get_length(self) -> int:
+        """
+        Get length of index.
+        """
+        response = self.client.post('/length', target_executor='CustomIndexer', return_responses=True)
+        json_response = eval(response[0].json())
+        results = json_response['parameters']['__results__']
+        return results[list(results.keys())[0]]['length']
 
     def to_document_array(self, list_docs: List[List[str]]) -> List[Document]:
         """
@@ -29,9 +54,10 @@ class Search:
             list of documents
         """
         jina_docs = []
+        current_num_docs = self._get_length()
         for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
             root_document = Document()
-            root_document.text = 'Document {}'.format(i)
+            root_document.text = 'Document {}'.format(int(i + current_num_docs))
             for doc in docs:
                 document = Document(text=doc)
                 document.tags = {'parent_text': root_document.text}
@@ -55,11 +81,16 @@ class Search:
             # Persist
             self.data_handler.persist_preprocessed_docs(docs, path)
 
+        # Remove workspace and reinit flow before indexing to avoid duplicates if reload
+        if reload:
+            if os.path.exists('workspace'):
+                shutil.rmtree('workspace')
+            self.close_flow()
+            self._init_flow()
+
         # Convert to documents
         docs = self.to_document_array(docs)
-        # Delete workspace before indexing to avoid duplicates
-        # if os.path.isdir('workspace'):
-        #     shutil.rmtree('workspace')
+
         self.flow.index(docs, parameters={'traversal_paths': '@c'}, show_progress=True)
 
     def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
@@ -70,8 +101,7 @@ class Search:
         query = Document(text=query)
         response = self.flow.search(
             inputs=query,
-            return_results=True,
-            parameters={'limit': top_k}
+            return_results=True
         )
         # Get top k matches
         top_k_matches = []
