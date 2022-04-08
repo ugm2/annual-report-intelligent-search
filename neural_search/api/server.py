@@ -40,11 +40,13 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
 
 @app.post('/search')
 def search_docs(search_request: SearchRequest) -> SearchResponse:
-    search_results = search.query(search_request.query)
+    search_results = search.query(
+        search_request.query,
+        top_k=search_request.top_k)
     return SearchResponse(
         docs=search_results,
         query=search_request.query,
-        top_k=5)
+        top_k=search_request.top_k)
 
 @app.on_event("shutdown")
 def shutdown_event():

@@ -78,7 +78,6 @@ class CustomIndexer(Executor):
         :param parameters: the runtime arguments to `DocumentArray`'s match
         function. They overwrite the original match_args arguments.
         """
-        print("Length 2: ", len(self._index))
         match_args = (
             {**self._match_args, **parameters}
             if parameters is not None

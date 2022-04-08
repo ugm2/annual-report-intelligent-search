@@ -32,7 +32,7 @@ class Search:
         """
         Clear the index calling the endpoint /clear
         """
-        self.client.post('/clear')
+        self.client.post('/clear', target_executor='CustomIndexer')
 
     def _get_length(self) -> int:
         """
@@ -97,11 +97,11 @@ class Search:
         """
         Query documents.
         """
-
         query = Document(text=query)
         response = self.flow.search(
             inputs=query,
-            return_results=True
+            return_results=True,
+            parameters={'limit': top_k}
         )
         # Get top k matches
         top_k_matches = []
