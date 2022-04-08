@@ -41,7 +41,7 @@ class Search:
         response = self.client.post('/length', target_executor='CustomIndexer', return_responses=True)
         json_response = eval(response[0].json())
         results = json_response['parameters']['__results__']
-        return results[list(results.keys())[0]]['length']
+        return int(results[list(results.keys())[0]]['length'])
 
     def to_document_array(self, list_docs: List[List[str]]) -> List[Document]:
         """
@@ -55,6 +55,7 @@ class Search:
         """
         jina_docs = []
         current_num_docs = self._get_length()
+        print('{} previously indexed documents'.format(current_num_docs))
         for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
             root_document = Document()
             root_document.text = 'Document {}'.format(int(i + current_num_docs))
@@ -83,15 +84,15 @@ class Search:
 
         # Remove workspace and reinit flow before indexing to avoid duplicates if reload
         if reload:
-            if os.path.exists('workspace'):
-                shutil.rmtree('workspace')
-            self.close_flow()
-            self._init_flow()
+            self._clear_index()
 
         # Convert to documents
         docs = self.to_document_array(docs)
 
         self.flow.index(docs, parameters={'traversal_paths': '@c'}, show_progress=True)
+
+        # Print number of documents indexed in total
+        print('{} documents indexed in total'.format(self._get_length()))
 
     def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
         """
