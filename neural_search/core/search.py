@@ -43,7 +43,7 @@ class Search:
         results = json_response['parameters']['__results__']
         return int(results[list(results.keys())[0]]['length'])
 
-    def to_document_array(self, list_docs: List[List[str]]) -> List[Document]:
+    def to_document_array(self, list_docs: List[List[str]]) -> DocumentArray:
         """
         Convert list of list of strings to list of documents.
 
@@ -82,7 +82,7 @@ class Search:
             # Persist
             self.data_handler.persist_preprocessed_docs(docs, path)
 
-        # Remove workspace and reinit flow before indexing to avoid duplicates if reload
+        # Clear documents
         if reload:
             self._clear_index()
 
@@ -94,7 +94,7 @@ class Search:
         # Print number of documents indexed in total
         print('{} documents indexed in total'.format(self._get_length()))
 
-    def query(self, query: str, top_k : int = 5) -> List[Dict[str, float]]:
+    def query(self, query: str, top_k : int = 5) -> List[dict]:
         """
         Query documents.
         """
