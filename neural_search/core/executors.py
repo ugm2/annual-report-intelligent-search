@@ -90,6 +90,21 @@ class CustomIndexer(Executor):
         traversal_left = parameters.get('traversal_left', self.default_traversal_left)
         match_args = CustomIndexer._filter_match_params(docs, match_args)
         docs[traversal_left].match(self._index[traversal_right], **match_args)
+        context_length = int(parameters.get('context_length', 5))
+        for d in docs[traversal_left]:
+            for m in d.matches:
+                parent_doc = self._index[m.parent_id]
+                current_doc_id = m.id
+                context = ""
+                for i, c in enumerate(parent_doc.chunks):
+                    if c.id == current_doc_id:
+                        surrounding_chunks = parent_doc.chunks[max(0, i - context_length) : i + context_length]
+                        context = " ".join([c.text for c in surrounding_chunks])
+                        break
+                m.tags = {
+                    'parent_text': parent_doc.text,
+                    'context': context
+                    }
 
     @staticmethod
     def _filter_match_params(docs, match_args):

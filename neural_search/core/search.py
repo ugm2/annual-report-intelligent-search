@@ -57,12 +57,13 @@ class Search:
         current_num_docs = self._get_length()
         print('{} previously indexed documents'.format(current_num_docs))
         for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
-            root_document = Document()
-            root_document.text = 'Document {}'.format(int(i + current_num_docs))
+            inner_docs = []
             for doc in docs:
                 document = Document(text=doc)
-                document.tags = {'parent_text': root_document.text}
-                root_document.chunks.append(document)
+                inner_docs.append(document)
+            root_document = Document(
+                text='Document {}'.format(int(i + current_num_docs)),
+                chunks=inner_docs)
             jina_docs.append(root_document)
         return DocumentArray(jina_docs)
 
@@ -94,7 +95,7 @@ class Search:
         # Print number of documents indexed in total
         print('{} documents indexed in total'.format(self._get_length()))
 
-    def query(self, query: str, top_k : int = 5) -> List[dict]:
+    def query(self, query: str, top_k : int = 5, context_length : int = 5) -> List[dict]:
         """
         Query documents.
         """
@@ -102,7 +103,7 @@ class Search:
         response = self.flow.search(
             inputs=query,
             return_results=True,
-            parameters={'limit': top_k}
+            parameters={'limit': top_k, 'context_length': context_length},
         )
         # Get top k matches
         top_k_matches = []
@@ -112,6 +113,6 @@ class Search:
                 top_k_matches.append({
                     'text': match.text,
                     'score': round(1.0 - score, 2),
-                    'tags': {'parent_text': match.tags['parent_text']}
+                    'tags': match.tags
                 })
         return top_k_matches

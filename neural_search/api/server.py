@@ -13,19 +13,18 @@ data_handler = DataHandler()
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 5
-
-class SearchResponseTags(BaseModel):
-    parent_text: str
+    context_length: int = 5
 
 class SearchResponseDict(BaseModel):
     text: str
     score: float
-    tags: SearchResponseTags
+    tags: dict
 
 class SearchResponse(BaseModel):
     docs: List[SearchResponseDict]
     query: str
     top_k: int
+    context_length: int
 
 @app.post('/index')
 def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
@@ -42,11 +41,13 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
 def search_docs(search_request: SearchRequest) -> SearchResponse:
     search_results = search.query(
         search_request.query,
-        top_k=search_request.top_k)
+        top_k=search_request.top_k,
+        context_length=search_request.context_length)
     return SearchResponse(
         docs=search_results,
         query=search_request.query,
-        top_k=search_request.top_k)
+        top_k=search_request.top_k,
+        context_length=search_request.context_length)
 
 @app.on_event("shutdown")
 def shutdown_event():
