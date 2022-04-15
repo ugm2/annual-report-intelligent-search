@@ -4,11 +4,17 @@ from pydantic import BaseModel
 from typing import List
 from neural_search.core.search import Search
 from neural_search.core.utils import DataHandler
+from neural_search.core.tagger import NERTagger
 
 app = FastAPI()
 
-search = Search()
-data_handler = DataHandler()
+tagger = NERTagger()
+data_handler = DataHandler(
+    ner_tagger=tagger
+)
+search = Search(
+    data_handler=data_handler
+)
 
 class SearchRequest(BaseModel):
     query: str
@@ -27,7 +33,10 @@ class SearchResponse(BaseModel):
     context_length: int
 
 @app.post('/index')
-def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
+def index_docs(zipfile: UploadFile = None,
+               reload: bool = False,
+               reload_persisted: bool = False,
+               tag: bool = True) -> None:
     print("Loading bytes")
     file_bytes = None
     if zipfile is not None:
@@ -35,7 +44,7 @@ def index_docs(zipfile: UploadFile = None, reload: bool = False) -> None:
     print("Loading zip")
     data = data_handler.data_to_list(file_bytes)
     print("Indexing")
-    search.index(data, reload)
+    search.index(data, reload, reload_persisted, tag)
 
 @app.post('/search')
 def search_docs(search_request: SearchRequest) -> SearchResponse:

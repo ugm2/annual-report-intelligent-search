@@ -101,10 +101,10 @@ class CustomIndexer(Executor):
                         surrounding_chunks = parent_doc.chunks[max(0, i - context_length) : i + context_length]
                         context = " ".join([c.text for c in surrounding_chunks])
                         break
-                m.tags = {
+                m.tags.update({
                     'parent_text': parent_doc.text,
                     'context': context
-                    }
+                    })
 
     @staticmethod
     def _filter_match_params(docs, match_args):

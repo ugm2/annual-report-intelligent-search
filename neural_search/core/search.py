@@ -1,8 +1,7 @@
 from jina import Flow, Client
 from docarray import Document, DocumentArray
-import shutil
 import os
-from typing import List, Dict
+from typing import List
 from neural_search.core.utils import DataHandler
 from tqdm import tqdm
 
@@ -10,8 +9,8 @@ FLOW_PATH = os.environ.get('FLOW_PATH', 'flows/index_query.yml')
 
 class Search:
 
-    def __init__(self):
-        self.data_handler = DataHandler()
+    def __init__(self, data_handler: DataHandler):
+        self.data_handler = data_handler if data_handler is not None else DataHandler()
         self._init_flow()
 
     def _init_flow(self):
@@ -43,7 +42,7 @@ class Search:
         results = json_response['parameters']['__results__']
         return int(results[list(results.keys())[0]]['length'])
 
-    def to_document_array(self, list_docs: List[List[str]]) -> DocumentArray:
+    def to_document_array(self, list_docs: List[dict]) -> DocumentArray:
         """
         Convert list of list of strings to list of documents.
 
@@ -58,8 +57,9 @@ class Search:
         print('{} previously indexed documents'.format(current_num_docs))
         for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
             inner_docs = []
-            for doc in docs:
+            for doc, tags in zip(docs['sentences'], docs['tags']):
                 document = Document(text=doc)
+                document.tags = tags
                 inner_docs.append(document)
             root_document = Document(
                 text='Document {}'.format(int(i + current_num_docs)),
@@ -67,19 +67,23 @@ class Search:
             jina_docs.append(root_document)
         return DocumentArray(jina_docs)
 
-    def index(self, docs: List[str], reload: bool = False) -> None:
+    def index(self,
+              docs: List[tuple],
+              reload: bool = False,
+              reload_persisted: bool = False,
+              tag: bool = True) -> None:
         """
         Index documents.
         """
         # Check if hash of docs name exists
-        exists, path = self.data_handler.hash_docs_name_exists(docs)
-        if exists and not reload:
+        exists, path, docs = self.data_handler.hash_docs_name_exists(docs)
+        if exists and not reload_persisted:
             print('Data already exists. Loading persisted data...')
             # Load
             docs = self.data_handler.load_persisted_docs(path)
         else:
             # Preprocess
-            docs = self.data_handler.preprocess_docs(docs)
+            docs = self.data_handler.preprocess_docs(docs, tag)
             # Persist
             self.data_handler.persist_preprocessed_docs(docs, path)
 

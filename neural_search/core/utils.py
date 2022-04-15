@@ -4,21 +4,21 @@ import zipfile
 import io
 from spacy.lang.en import English
 from hashlib import sha512
-import sys
-import csv
-csv.field_size_limit(sys.maxsize)
+import json
 from tqdm import tqdm
+from neural_search.core.tagger import NERTagger
 
 # Local data path
 DATA_PATH = os.environ.get('DATA_PATH', 'data/')
 
 class DataHandler:
 
-    def __init__(self):
+    def __init__(self, ner_tagger: NERTagger):
         self.nlp = English()
         self.nlp.add_pipe("sentencizer")
         self.nlp.max_length = 10000000
         self.persist_path = os.path.join(DATA_PATH, 'persist')
+        self.ner_tagger = ner_tagger if ner_tagger is not None else NERTagger()
 
     def _clean_text(self, text):
         """
@@ -36,7 +36,7 @@ class DataHandler:
         text = ' '.join(text.split())
         return text
 
-    def preprocess_docs(self, docs: List[str]) -> List[List[str]]:
+    def preprocess_docs(self, docs: List[str], tag: bool = False) -> List[List[str]]:
         """
         Preprocess documents.
 
@@ -54,11 +54,19 @@ class DataHandler:
             sentences = [sent.text for sent in doc.sents]
             # Clean sentences
             sentences = list(map(self._clean_text, sentences))
+            # Tag sentences
+            tags = []
+            if tag:
+                for s in sentences:
+                    tags.append(self.ner_tagger.predict(s))
             # Add to docs
-            docs_sentences.append(sentences)
+            docs_sentences.append({
+                'sentences': sentences,
+                'tags': tags
+            })
         return docs_sentences
 
-    def hash_docs_name_exists(self, docs: List[str]) -> Tuple[bool, str]:
+    def hash_docs_name_exists(self, docs: List[tuple]) -> Tuple[bool, str]:
         """
         Check if hash of docs name exists.
 
@@ -71,13 +79,15 @@ class DataHandler:
         # Create folder if it doesn't exist
         os.makedirs(self.persist_path, exist_ok=True)
         # Compute hash of docs
-        name = ''.join([doc[0] for doc in docs])
+        name = ''.join([doc[1] for doc in docs])
         _hash = sha512(name.encode('utf-8')).hexdigest()
         # Check if _hash exists
-        path = os.path.join(self.persist_path, _hash + '.csv')
-        return os.path.exists(path), path
+        path = os.path.join(self.persist_path, _hash + '.json')
+        # Return docs without filenames
+        docs = [doc[0] for doc in docs]
+        return os.path.exists(path), path, docs
 
-    def persist_preprocessed_docs(self, docs: List[List[str]], path: str) -> None:
+    def persist_preprocessed_docs(self, docs: List[dict], path: str) -> None:
         """
         Persist preprocessed documents.
 
@@ -89,10 +99,9 @@ class DataHandler:
         """
         # Save to file
         with open(path, 'w') as f:
-            writer = csv.writer(f)
-            writer.writerows(docs)
+            json.dump(docs, f)
 
-    def load_persisted_docs(self, path: str) -> List[List[str]]:
+    def load_persisted_docs(self, path: str) -> List[dict]:
         """
         Load persisted docs.
 
@@ -104,11 +113,10 @@ class DataHandler:
         """
         # Load data from file
         with open(path, 'r') as f:
-            reader = csv.reader(f)
-            data = list(reader)
+            data = json.load(f)
         return data
 
-    def _handle_data(self, data: io.BytesIO = None) -> List[str]:
+    def _handle_data(self, data: io.BytesIO = None) -> List[tuple]:
         """
         Handle zip file or local data files.
 
@@ -123,7 +131,7 @@ class DataHandler:
             try:
                 f = zipfile.ZipFile(data)
                 for file in f.namelist():
-                    docs.append(f.read(file).decode('utf-8'))
+                    docs.append((f.read(file).decode('utf-8'), file))
                 f.close()
             except Exception as e:
                 print('File is not a zip file. Error: ', e)
@@ -137,7 +145,7 @@ class DataHandler:
                 with open(os.path.join(data_path, file), 'r') as f:
                     data = f.read()
                 # Add to docs
-                docs.append(data)
+                docs.append((data, file))
         return docs
 
     def data_to_list(self, data: io.BytesIO = None) -> List[str]:
