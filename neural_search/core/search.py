@@ -56,10 +56,12 @@ class Search:
         current_num_docs = self._get_length()
         print('{} previously indexed documents'.format(current_num_docs))
         for i, docs in enumerate(tqdm(list_docs, desc='Converting to documents')):
-            inner_docs = []
+            inner_docs = DocumentArray()
             for doc, tags in zip(docs['sentences'], docs['tags']):
-                document = Document(text=doc)
-                document.tags = tags
+                document = Document(
+                    text=doc,
+                    tags=tags
+                )
                 inner_docs.append(document)
             root_document = Document(
                 text='Document {}'.format(int(i + current_num_docs)),

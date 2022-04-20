@@ -11,7 +11,7 @@ sentence-transformers = "2.0.0"
 streamlit = "^1.5.1"
 fastapi = "^0.73.0"
 spacy = "^3.2.2"
-jina = "^3.0.2"
+jina = "^3.0.3"
 
 [tool.poetry.dev-dependencies]
 

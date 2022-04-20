@@ -34,7 +34,7 @@ class DataHandler:
         text = text.replace('\n', ' ')
         # Remove multiple spaces
         text = ' '.join(text.split())
-        return text
+        return text.strip()
 
     def preprocess_docs(self, docs: List[str], tag: bool = False) -> List[List[str]]:
         """
@@ -54,11 +54,15 @@ class DataHandler:
             sentences = [sent.text for sent in doc.sents]
             # Clean sentences
             sentences = list(map(self._clean_text, sentences))
+            # Remove empty strings
+            sentences = list(filter(lambda x: x != '', sentences))
             # Tag sentences
             tags = []
             if tag:
                 for s in sentences:
                     tags.append(self.ner_tagger.predict(s))
+            else:
+                tags = [{}] * len(sentences)
             # Add to docs
             docs_sentences.append({
                 'sentences': sentences,
@@ -138,7 +142,7 @@ class DataHandler:
         else:
             # Load data from folder
             # List of files in folder
-            data_path = os.path.join(DATA_PATH, 'annual_accounts_txt')
+            data_path = os.path.join(DATA_PATH, 'annual_accounts_old')
             files = os.listdir(data_path)
             for file in files:
                 # Read file
