@@ -60,7 +60,10 @@ class DataHandler:
             tags = []
             if tag:
                 for s in sentences:
-                    tags.append(self.ner_tagger.predict(s))
+                    predicted_tags = self.ner_tagger.predict(s)
+                    # Filter out keys with None
+                    predicted_tags = dict(filter(lambda x: x[0] is not None, predicted_tags.items()))
+                    tags.append(predicted_tags)
             else:
                 tags = [{}] * len(sentences)
             # Add to docs
