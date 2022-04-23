@@ -101,25 +101,25 @@ class CustomIndexer(Executor):
         match_args = CustomIndexer._filter_match_params(docs, match_args)
 
         # Filter by tag
-        filtered_id_docs = []
-        _index_splitted_cache = {}
-        for filter_dict in filter_by_tags:
-            key = list(filter_dict.keys())[0]
-            value = filter_dict[key]
-            if key not in _index_splitted_cache:
-                _index_splitted_cache[key] = self._index[traversal_right].split_by_tag(tag=key)
-            
-            filtered_id_docs += [[doc.id for doc in _index_splitted_cache[key][value]]]
+        if len(filter_by_tags) > 0:
+            filtered_id_docs = []
+            _index_splitted_cache = {}
+            for filter_dict in filter_by_tags:
+                key = list(filter_dict.keys())[0]
+                value = filter_dict[key]
+                if key not in _index_splitted_cache:
+                    _index_splitted_cache[key] = self._index[traversal_right].split_by_tag(tag=key)
+                if value in _index_splitted_cache[key]:
+                    filtered_id_docs += [[doc.id for doc in _index_splitted_cache[key][value]]]
 
-        _index_filtered = DocumentArray()
-        if filter_by_tags_method == 'OR':
-            unique_doc_ids = list(set([id for docarray in filtered_id_docs for id in docarray]))
-            _index_filtered = self._index[traversal_right][unique_doc_ids]
-        elif filter_by_tags_method == 'AND':
-            intersection_doc_ids = list(set.intersection(*map(set, filtered_id_docs)))
-            _index_filtered = self._index[traversal_right][intersection_doc_ids]
-            
-        if len(_index_filtered) == 0:
+            _index_filtered = DocumentArray()
+            if filter_by_tags_method == 'OR':
+                unique_doc_ids = list(set([id for docarray in filtered_id_docs for id in docarray]))
+                _index_filtered = self._index[traversal_right][unique_doc_ids]
+            elif filter_by_tags_method == 'AND' and len(filtered_id_docs) > 0:
+                intersection_doc_ids = list(set.intersection(*map(set, filtered_id_docs)))
+                _index_filtered = self._index[traversal_right][intersection_doc_ids]
+        else:
             _index_filtered = self._index[traversal_right]
 
         docs[traversal_left].match(_index_filtered, **match_args)
