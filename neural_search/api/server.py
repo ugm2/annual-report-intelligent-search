@@ -20,17 +20,16 @@ class SearchRequest(BaseModel):
     query: str
     top_k: int = 5
     context_length: int = 5
+    filter_by_tags: List[dict] = []
+    filter_by_tags_method: str = 'OR'
 
 class SearchResponseDict(BaseModel):
     text: str
     score: float
     tags: dict
 
-class SearchResponse(BaseModel):
+class SearchResponse(SearchRequest):
     docs: List[SearchResponseDict]
-    query: str
-    top_k: int
-    context_length: int
 
 @app.post('/index')
 def index_docs(zipfile: UploadFile = None,
@@ -51,12 +50,17 @@ def search_docs(search_request: SearchRequest) -> SearchResponse:
     search_results = search.query(
         search_request.query,
         top_k=search_request.top_k,
-        context_length=search_request.context_length)
+        context_length=search_request.context_length,
+        filter_by_tags=search_request.filter_by_tags,
+        filter_by_tags_method=search_request.filter_by_tags_method)
     return SearchResponse(
         docs=search_results,
         query=search_request.query,
         top_k=search_request.top_k,
-        context_length=search_request.context_length)
+        context_length=search_request.context_length,
+        filter_by_tags=search_request.filter_by_tags,
+        filter_by_tags_method=search_request.filter_by_tags_method
+        )
 
 @app.on_event("shutdown")
 def shutdown_event():

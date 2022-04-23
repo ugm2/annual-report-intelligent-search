@@ -101,7 +101,12 @@ class Search:
         # Print number of documents indexed in total
         print('{} documents indexed in total'.format(self._get_length()))
 
-    def query(self, query: str, top_k : int = 5, context_length : int = 5) -> List[dict]:
+    def query(self,
+              query: str,
+              top_k : int = 5,
+              context_length : int = 5,
+              filter_by_tags : List[dict] = [],
+              filter_by_tags_method : str = 'OR') -> List[dict]:
         """
         Query documents.
         """
@@ -109,7 +114,12 @@ class Search:
         response = self.flow.search(
             inputs=query,
             return_results=True,
-            parameters={'limit': top_k, 'context_length': context_length},
+            parameters={
+                'limit': top_k,
+                'context_length': context_length,
+                'filter_by_tags': filter_by_tags,
+                'filter_by_tags_method': filter_by_tags_method
+            },
         )
         # Get top k matches
         top_k_matches = []
