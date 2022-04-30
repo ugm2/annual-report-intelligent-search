@@ -2,8 +2,10 @@ import inspect
 import os
 from typing import Dict, Optional
 
-from jina import DocumentArray, Executor, requests
+from docarray import DocumentArray
+from jina import Executor, requests
 from jina.logging.logger import JinaLogger
+from collections import Counter
 
 
 class CustomIndexer(Executor):
@@ -48,6 +50,7 @@ class CustomIndexer(Executor):
         self.logger = JinaLogger(self.metas.name)
         self.default_traversal_right = traversal_right
         self.default_traversal_left = traversal_left
+        self._index_splitted_cache = {}
 
     @property
     def table_name(self) -> str:
@@ -64,6 +67,7 @@ class CustomIndexer(Executor):
         """
         if docs:
             self._index.extend(docs)
+            self._index_splitted_cache = {}
 
     @requests(on='/search')
     def search(
@@ -100,27 +104,7 @@ class CustomIndexer(Executor):
         traversal_left = parameters.get('traversal_left', self.default_traversal_left)
         match_args = CustomIndexer._filter_match_params(docs, match_args)
 
-        # Filter by tag
-        if len(filter_by_tags) > 0:
-            filtered_id_docs = []
-            _index_splitted_cache = {}
-            for filter_dict in filter_by_tags:
-                key = list(filter_dict.keys())[0]
-                value = filter_dict[key]
-                if key not in _index_splitted_cache:
-                    _index_splitted_cache[key] = self._index[traversal_right].split_by_tag(tag=key)
-                if value in _index_splitted_cache[key]:
-                    filtered_id_docs += [[doc.id for doc in _index_splitted_cache[key][value]]]
-
-            _index_filtered = DocumentArray()
-            if filter_by_tags_method == 'OR':
-                unique_doc_ids = list(set([id for docarray in filtered_id_docs for id in docarray]))
-                _index_filtered = self._index[traversal_right][unique_doc_ids]
-            elif filter_by_tags_method == 'AND' and len(filtered_id_docs) > 0:
-                intersection_doc_ids = list(set.intersection(*map(set, filtered_id_docs)))
-                _index_filtered = self._index[traversal_right][intersection_doc_ids]
-        else:
-            _index_filtered = self._index[traversal_right]
+        _index_filtered = self._filter_by_tags(filter_by_tags, filter_by_tags_method, traversal_right)
 
         docs[traversal_left].match(_index_filtered, **match_args)
         context_length = int(parameters.get('context_length', 5))
@@ -138,6 +122,31 @@ class CustomIndexer(Executor):
                     'parent_text': parent_doc.text,
                     'context': context
                     })
+
+    def _filter_by_tags(self, filter_by_tags, filter_by_tags_method, traversal_right):
+        """Filter the index by tags"""
+
+        if len(filter_by_tags) > 0:
+            filtered_id_docs = []
+            for filter_dict in filter_by_tags:
+                key = list(filter_dict.keys())[0]
+                value = filter_dict[key]
+                if key not in self._index_splitted_cache:
+                    self._index_splitted_cache[key] = self._index[traversal_right].split_by_tag(tag=key)
+                if value in self._index_splitted_cache[key]:
+                    filtered_id_docs += [[doc.id for doc in self._index_splitted_cache[key][value]]]
+
+            _index_filtered = DocumentArray()
+            if filter_by_tags_method == 'OR':
+                unique_doc_ids = list(set([id for docarray in filtered_id_docs for id in docarray]))
+                _index_filtered = self._index[traversal_right][unique_doc_ids]
+            elif filter_by_tags_method == 'AND' and len(filtered_id_docs) > 0:
+                intersection_doc_ids = list(set.intersection(*map(set, filtered_id_docs)))
+                _index_filtered = self._index[traversal_right][intersection_doc_ids]
+        else:
+            _index_filtered = self._index[traversal_right]
+
+        return _index_filtered
 
     @staticmethod
     def _filter_match_params(docs, match_args):
@@ -181,6 +190,37 @@ class CustomIndexer(Executor):
         """
         for doc in docs:
             doc.embedding = self._index[doc.id].embedding
+
+    @requests(on='/tags')
+    def tags(self, parameters: Dict, **kwargs):
+        """retrieve tags of Documents by id if provided, otherwise all tags
+
+        :param parameters: parameters to the request
+        """
+        print(parameters)
+        ids = parameters.get('doc_ids', [])
+        traversal_right = parameters.get('traversal_right', self.default_traversal_right)
+        index_traversal = self._index[traversal_right]
+
+        def count_tags_func(tags):
+            count_tags = {}
+            for tag_dict in tags:
+                for key, value in tag_dict.items():
+                    if key in count_tags:
+                        count_tags[key] += [value]
+                    else:
+                        count_tags[key] = [value]
+            count_tags = {key: dict(Counter(value)) for key, value in count_tags.items()}
+            return count_tags
+
+        if len(ids) == 0:
+            tags =  [d.tags for d in index_traversal if d.tags != {}]
+        else:
+            tags = [index_traversal[id].tags for id in ids]
+
+        count_tags = count_tags_func(tags)
+        return {'tags': count_tags}
+
 
     @requests(on='/clear')
     def clear(self, **kwargs):

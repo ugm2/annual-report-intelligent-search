@@ -10,6 +10,7 @@ from neural_search.core.tagger import NERTagger
 
 # Local data path
 DATA_PATH = os.environ.get('DATA_PATH', 'data/')
+INIT_TAGGER = eval(os.environ.get('INIT_TAGGER', True))
 
 class DataHandler:
 
@@ -18,7 +19,9 @@ class DataHandler:
         self.nlp.add_pipe("sentencizer")
         self.nlp.max_length = 10000000
         self.persist_path = os.path.join(DATA_PATH, 'persist')
-        self.ner_tagger = ner_tagger if ner_tagger is not None else NERTagger()
+        self.ner_tagger = ner_tagger
+        if self.ner_tagger is None and INIT_TAGGER:
+            self.ner_tagger = NERTagger()
 
     def _clean_text(self, text):
         """

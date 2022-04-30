@@ -38,8 +38,7 @@ class Search:
         Get length of index.
         """
         response = self.client.post('/length', target_executor='CustomIndexer', return_responses=True)
-        json_response = eval(response[0].json())
-        results = json_response['parameters']['__results__']
+        results = response[0].parameters['__results__']
         return int(results[list(results.keys())[0]]['length'])
 
     def to_document_array(self, list_docs: List[dict]) -> DocumentArray:
@@ -127,8 +126,22 @@ class Search:
             for match in r.matches:
                 score = list(match.scores.values())[0].value
                 top_k_matches.append({
+                    'doc_id': match.id,
                     'text': match.text,
                     'score': round(1.0 - score, 2),
                     'tags': match.tags
                 })
         return top_k_matches
+
+    def get_tags(self, doc_ids: List[str]) -> List[str]:
+        """
+        Get tags.
+        """
+        response = self.client.post(
+            '/tags',
+            parameters={'doc_ids': doc_ids, 'traversal_right': '@c'},
+            target_executor='CustomIndexer',
+            return_responses=True)
+        results = response[0].parameters['__results__']
+        tags = results[list(results.keys())[0]]['tags']
+        return tags

@@ -5,8 +5,8 @@ import torch
 
 from transformers import AutoModel, AutoTokenizer
 
-from jina import DocumentArray, Executor, requests
-
+from jina import Executor, requests
+from docarray import DocumentArray
 
 class CustomTransformerTorchEncoder(Executor):
     """The CustomTransformerTorchEncoder encodes sentences into embeddings using transformers models."""
