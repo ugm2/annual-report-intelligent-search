@@ -197,7 +197,6 @@ class CustomIndexer(Executor):
 
         :param parameters: parameters to the request
         """
-        print(parameters)
         ids = parameters.get('doc_ids', [])
         traversal_right = parameters.get('traversal_right', self.default_traversal_right)
         index_traversal = self._index[traversal_right]
