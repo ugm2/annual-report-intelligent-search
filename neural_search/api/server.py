@@ -1,23 +1,42 @@
 import io
 import os
 from fastapi import FastAPI, UploadFile
+from fastapi.param_functions import Depends
 from pydantic import BaseModel
-from typing import List
+from typing import Dict, List
 from neural_search.core.search import Search
 from neural_search.core.utils import DataHandler
-from neural_search.core.tagger import NERTagger
+from neural_search.core.tagger import QuestionAnswerTagger
 
 INIT_TAGGER = eval(os.environ.get('INIT_TAGGER', True))
 
 app = FastAPI()
 
-tagger = NERTagger() if INIT_TAGGER else None
+question_tags = {
+    'year': 'What year was the document written?',
+    'who': 'Who is involved?',
+    'challenges': 'What are the main challenges?',
+    'opportunities': 'What are the main opportunities?',
+    'initiatives': 'What are the main initiatives?'
+}
+tagger = QuestionAnswerTagger(question_tags=question_tags) if INIT_TAGGER else None
 data_handler = DataHandler(
     ner_tagger=tagger
 )
 search = Search(
     data_handler=data_handler
 )
+
+class IndexRequest(BaseModel):
+    zipfile: UploadFile
+    reload: bool = False
+    reload_persisted: bool = False
+    tag: bool = False
+    # question_tags: Dict[str, str] = question_tags
+    tagging_confidence: float = 0.65
+
+    class Config:
+         orm_mode=True
 
 class SearchRequest(BaseModel):
     query: str
@@ -39,27 +58,28 @@ class TagsRequest(BaseModel):
     doc_ids: List[str]
 
 @app.post('/index')
-def index_docs(zipfile: UploadFile = None,
-               reload: bool = False,
-               reload_persisted: bool = False,
-               tag: bool = True) -> None:
+def index_docs(request: IndexRequest = Depends()) -> None:
     global tagger
     global data_handler
     global search
-    if tagger is None and tag:
+    # question_tags = request.question_tags
+    if request.tag and (tagger is None or
+                # tagger.questions != question_tags or
+                tagger.tagging_confidence != request.tagging_confidence):
         print('Initializing NER tagger...')
-        tagger = NERTagger()
+        tagger = QuestionAnswerTagger(questions=question_tags,
+                                      tagging_confidence=request.tagging_confidence)
         data_handler.ner_tagger = tagger
         search.data_handler = data_handler
 
     print("Loading bytes")
     file_bytes = None
-    if zipfile is not None:
-        file_bytes = io.BytesIO(zipfile.file.read())
+    if request.zipfile is not None:
+        file_bytes = io.BytesIO(request.zipfile.file.read())
     print("Loading zip")
     data = data_handler.data_to_list(file_bytes)
     print("Indexing")
-    search.index(data, reload, reload_persisted, tag)
+    search.index(data, request.reload, request.reload_persisted, request.tag)
 
 @app.post('/search')
 def search_docs(search_request: SearchRequest) -> SearchResponse:

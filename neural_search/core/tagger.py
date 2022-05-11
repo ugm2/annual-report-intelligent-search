@@ -60,3 +60,23 @@ class NERTagger:
             results[current_class] = accumulate
 
         return results
+
+class QuestionAnswerTagger:
+
+    def __init__(self,
+                 model_name="deepset/roberta-base-squad2",
+                 questions=None,
+                 tagging_confidence=0.65):
+        print("Loading QA model...")
+        self.model = pipeline('question-answering', model_name)
+        self.questions = questions if questions is not None else {}
+        self.tagging_confidence = tagging_confidence
+        print("QA model loaded.")
+
+    def predict(self, sentence):
+        results = {}
+        for tag, question in self.questions.items():
+            model_output = self.model(question=question, context=sentence)
+            if model_output['score'] > self.tagging_confidence:
+                results[tag] = model_output['answer']
+        return results
