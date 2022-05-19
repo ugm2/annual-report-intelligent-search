@@ -66,7 +66,7 @@ class QuestionAnswerTagger:
     def __init__(self,
                  model_name="deepset/roberta-base-squad2",
                  questions=None,
-                 tagging_confidence=0.65):
+                 tagging_confidence=0.5):
         print("Loading QA model...")
         self.model = pipeline('question-answering', model_name)
         self.questions = questions if questions is not None else {}

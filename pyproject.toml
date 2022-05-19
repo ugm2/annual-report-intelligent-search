@@ -12,6 +12,7 @@ streamlit = "^1.5.1"
 fastapi = "^0.73.0"
 spacy = "^3.2.2"
 jina = "^3.0.3"
+docarray = {extras = ["elasticsearch"], version = "^0.13.14"}
 
 [tool.poetry.dev-dependencies]
 

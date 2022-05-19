@@ -33,7 +33,7 @@ class IndexRequest(BaseModel):
     reload_persisted: bool = False
     tag: bool = False
     # question_tags: Dict[str, str] = question_tags
-    tagging_confidence: float = 0.65
+    tagging_confidence: float = 0.5
 
     class Config:
          orm_mode=True

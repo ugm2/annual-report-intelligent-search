@@ -21,9 +21,10 @@ class CustomIndexer(Executor):
     def __init__(
         self,
         match_args: Optional[Dict] = None,
-        table_name: str = 'simple_indexer_table',
+        index_name: str = 'simple_indexer_index',
         traversal_right: str = '@r',
         traversal_left: str = '@r',
+        n_dim: int = 512,
         **kwargs,
     ):
         """
@@ -40,11 +41,12 @@ class CustomIndexer(Executor):
         super().__init__(**kwargs)
 
         self._match_args = match_args or {}
+        self.n_dim = n_dim
         self._index = DocumentArray(
-            storage='sqlite',
+            storage='elasticsearch',
             config={
-                'connection': os.path.join(self.workspace, CustomIndexer.FILE_NAME),
-                'table_name': table_name,
+                'index_name': index_name,
+                'n_dim': self.n_dim
             },
         )  # with customize config
         self.logger = JinaLogger(self.metas.name)

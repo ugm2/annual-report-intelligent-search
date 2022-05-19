@@ -16,6 +16,7 @@ executors:
     uses_with:
       traversal_right: '@c'
       traversal_left: '@r'
+      n_dim: 512
     workspace: workspace
   - name: ranker
     uses: 'jinahub://SimpleRanker'
