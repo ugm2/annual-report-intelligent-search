@@ -59,8 +59,8 @@ class DataHandler:
             sentences = list(map(self._clean_text, sentences))
             # Remove empty strings
             sentences = list(filter(lambda x: x != '', sentences))
-            # Group sentences in chunks and join them
-            sentences = [' '.join(sentences[i:i+5]) for i in range(0, len(sentences), 5)]
+            # # Group sentences in chunks and join them
+            # sentences = [' '.join(sentences[i:i+5]) for i in range(0, len(sentences), 5)]
             # Tag sentences
             tags = []
             if tag:

@@ -75,8 +75,14 @@ class QuestionAnswerTagger:
 
     def predict(self, sentence):
         results = {}
-        for tag, question in self.questions.items():
+        for question_dict in self.questions:
+            tag = question_dict["tag"]
+            question = question_dict["question"]
+            if 'confidence' in question_dict:
+                confidence = question_dict["confidence"]
+            else:
+                confidence = self.tagging_confidence
             model_output = self.model(question=question, context=sentence)
-            if model_output['score'] > self.tagging_confidence:
+            if model_output['score'] > confidence:
                 results[tag] = model_output['answer']
         return results

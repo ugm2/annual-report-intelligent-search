@@ -8,6 +8,7 @@ executors:
     py_modules: 'neural_search/core/executors/encoder.py'
     uses_with:
       pretrained_model_name_or_path: 'sentence-transformers/all-MiniLM-L6-v2'
+      device: 'cpu'
   - name: CustomIndexer
     uses: 'CustomIndexer'
     py_modules: 'neural_search/core/executors/indexer.py'
@@ -24,4 +25,4 @@ executors:
       metric: 'cosine'
       ranking: 'max'
       traversal_paths: '@c'
-    volumes: 'workspace'
+    # volumes: 'workspace'

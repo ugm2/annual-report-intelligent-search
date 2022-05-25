@@ -12,13 +12,13 @@ INIT_TAGGER = eval(os.environ.get('INIT_TAGGER', True))
 
 app = FastAPI()
 
-question_tags = {
-    'year': 'What year was the document written?',
-    'who': 'Who is involved?',
-    'challenges': 'What are the main challenges?',
-    'opportunities': 'What are the main opportunities?',
-    'initiatives': 'What are the main initiatives?'
-}
+question_tags = [
+    {'tag': 'year', 'question': 'What year was the document written?', 'confidence': 0.95},
+    {'tag': 'who', 'question': 'Who is involved?', 'confidence': 0.5},
+    {'tag': 'challenges', 'question': 'What are the main challenges?', 'confidence': 0.5},
+    {'tag': 'opportunities', 'question': 'What are the main opportunities?', 'confidence': 0.5},
+    {'tag': 'initiatives', 'question': 'What are the main initiatives?', 'confidence': 0.5},
+]
 tagger = QuestionAnswerTagger(question_tags=question_tags) if INIT_TAGGER else None
 data_handler = DataHandler(
     ner_tagger=tagger
@@ -44,6 +44,19 @@ class SearchRequest(BaseModel):
     context_length: int = 5
     filter_by_tags: List[dict] = []
     filter_by_tags_method: str = 'OR'
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "query": "Companies",
+                "top_k": 5,
+                "context_length": 1,
+                "filter_by_tags": [
+                    {'tag': 'who', 'tag_value': 'BioPharmX', 'threshold': 0.5}
+                ],
+                "filter_by_tags_method": 'OR'
+            }
+        }
 
 class SearchResponseDict(BaseModel):
     doc_id: str
@@ -55,7 +68,7 @@ class SearchResponse(SearchRequest):
     docs: List[SearchResponseDict]
 
 class TagsRequest(BaseModel):
-    doc_ids: List[str]
+    doc_ids: List[str] = []
 
 @app.post('/index')
 def index_docs(request: IndexRequest = Depends()) -> None:

@@ -53,13 +53,6 @@ class CustomTransformerTorchEncoder(Executor):
         self.layer_index = layer_index
         self.max_length = max_length
 
-        if device is None:
-            if torch.backends.mps.is_available():
-                device = 'mps'
-            elif torch.cuda.is_available():
-                device = 'cuda'
-            else:
-                device = 'cpu'
         self.device = torch.device(device)
         self.embedding_fn_name = embedding_fn_name
 

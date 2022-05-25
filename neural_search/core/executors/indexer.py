@@ -1,12 +1,12 @@
 import inspect
-import os
 from typing import Dict, Optional
 
 from docarray import DocumentArray
 from jina import Executor, requests
 from jina.logging.logger import JinaLogger
 from collections import Counter
-
+from Levenshtein import ratio
+import numpy as np
 
 class CustomIndexer(Executor):
     """
@@ -127,24 +127,40 @@ class CustomIndexer(Executor):
 
     def _filter_by_tags(self, filter_by_tags, filter_by_tags_method, traversal_right):
         """Filter the index by tags"""
+        
+        def match_tags(tags, value, threshold=0.5):
+            ratios = np.array(list(map(lambda x: ratio(value, x), tags)))
+            match_id = np.argmax(ratios)
+            return tags[match_id] if ratios[match_id] > threshold else None
 
         if len(filter_by_tags) > 0:
             filtered_id_docs = []
             for filter_dict in filter_by_tags:
-                key = list(filter_dict.keys())[0]
-                value = filter_dict[key]
-                if key not in self._index_splitted_cache:
-                    self._index_splitted_cache[key] = self._index[traversal_right].split_by_tag(tag=key)
-                if value in self._index_splitted_cache[key]:
-                    filtered_id_docs += [[doc.id for doc in self._index_splitted_cache[key][value]]]
+                tag = filter_dict.get('tag')
+                tag_value = filter_dict.get('tag_value')
+                if tag is None or tag_value is None:
+                    continue
+                if tag not in self._index_splitted_cache:
+                    self._index_splitted_cache[tag] = self._index[traversal_right].split_by_tag(tag=tag)
+                matched_tag = match_tags(list(self._index_splitted_cache[tag].keys()), tag_value)
+                if matched_tag is not None:
+                    filtered_id_docs += [[doc.id for doc in self._index_splitted_cache[tag][matched_tag]]]
 
             _index_filtered = DocumentArray()
             if filter_by_tags_method == 'OR':
                 unique_doc_ids = list(set([id for docarray in filtered_id_docs for id in docarray]))
-                _index_filtered = self._index[traversal_right][unique_doc_ids]
+                if len(unique_doc_ids) == 0:
+                    self.logger.warning(f"No tags were found for the tags: {filter_by_tags}")
+                    _index_filtered = DocumentArray()
+                else:
+                    _index_filtered = self._index[traversal_right][unique_doc_ids]
             elif filter_by_tags_method == 'AND' and len(filtered_id_docs) > 0:
                 intersection_doc_ids = list(set.intersection(*map(set, filtered_id_docs)))
-                _index_filtered = self._index[traversal_right][intersection_doc_ids]
+                if len(intersection_doc_ids) == 0:
+                    self.logger.warning(f"No tags were found for the tags: {filter_by_tags}")
+                    _index_filtered = DocumentArray()
+                else:
+                    _index_filtered = self._index[traversal_right][intersection_doc_ids]
         else:
             _index_filtered = self._index[traversal_right]
 
