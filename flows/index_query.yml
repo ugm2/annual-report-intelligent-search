@@ -17,6 +17,7 @@ executors:
       traversal_right: '@c'
       traversal_left: '@r'
       n_dim: 512
+      index_name: simple_indexer_index
     workspace: workspace
   - name: ranker
     uses: 'jinahub://SimpleRanker'

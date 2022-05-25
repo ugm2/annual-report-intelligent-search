@@ -7,6 +7,7 @@ from jina.logging.logger import JinaLogger
 from collections import Counter
 from Levenshtein import ratio
 import numpy as np
+from torch import threshold
 
 class CustomIndexer(Executor):
     """
@@ -130,6 +131,8 @@ class CustomIndexer(Executor):
         
         def match_tags(tags, value, threshold=0.5):
             ratios = np.array(list(map(lambda x: ratio(value, x), tags)))
+            if len(ratios) == 0:
+                return None
             match_id = np.argmax(ratios)
             return tags[match_id] if ratios[match_id] > threshold else None
 
@@ -140,9 +143,10 @@ class CustomIndexer(Executor):
                 tag_value = filter_dict.get('tag_value')
                 if tag is None or tag_value is None:
                     continue
+                threshold = filter_dict.get('threshold', 0.5)
                 if tag not in self._index_splitted_cache:
                     self._index_splitted_cache[tag] = self._index[traversal_right].split_by_tag(tag=tag)
-                matched_tag = match_tags(list(self._index_splitted_cache[tag].keys()), tag_value)
+                matched_tag = match_tags(list(self._index_splitted_cache[tag].keys()), tag_value, threshold)
                 if matched_tag is not None:
                     filtered_id_docs += [[doc.id for doc in self._index_splitted_cache[tag][matched_tag]]]
 
