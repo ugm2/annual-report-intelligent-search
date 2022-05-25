@@ -12,13 +12,8 @@ Technologies used:
 
 ## Installation
 
-* Install poetry in your OS using [this guide](https://python-poetry.org/docs/)
-* Execute:
-
-```shell
-poetry install
-poetry shell
-```
+* Install Anaconda
+* Install dependencies using `sh install_dependencies.sh`
 
 ## Usage
 

@@ -7,7 +7,6 @@ executors:
     volumes: '~/.cache/huggingface:/root/.cache/huggingface'
     py_modules: 'neural_search/core/executors/encoder.py'
     uses_with:
-      device: 'cuda'
       pretrained_model_name_or_path: 'sentence-transformers/all-MiniLM-L6-v2'
   - name: CustomIndexer
     uses: 'CustomIndexer'

@@ -19,7 +19,7 @@ class CustomTransformerTorchEncoder(Executor):
         layer_index: int = -1,
         max_length: Optional[int] = None,
         embedding_fn_name: str = '__call__',
-        device: str = 'cpu',
+        device: str = None,
         traversal_paths: str = '@r',
         batch_size: int = 32,
         *args,
@@ -53,7 +53,14 @@ class CustomTransformerTorchEncoder(Executor):
         self.layer_index = layer_index
         self.max_length = max_length
 
-        self.device = device
+        if device is None:
+            if torch.backends.mps.is_available():
+                device = 'mps'
+            elif torch.cuda.is_available():
+                device = 'cuda'
+            else:
+                device = 'cpu'
+        self.device = torch.device(device)
         self.embedding_fn_name = embedding_fn_name
 
         self.tokenizer = AutoTokenizer.from_pretrained(base_tokenizer_model)
